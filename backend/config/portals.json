@@ -1,0 +1,331 @@
+{
+  "_fallback": {
+    "name": "CPGRAMS — Central Public Grievance Redress System",
+    "url": "https://pgportal.gov.in",
+    "officer": "Grievance Officer, Government of India",
+    "phone": "1800-11-0180",
+    "steps": [
+      "Go to pgportal.gov.in and click 'Lodge Grievance'",
+      "Register or login with your mobile number",
+      "Select the relevant Ministry or Department",
+      "Fill in the complaint form and attach your photo as evidence",
+      "Paste the petition text in the description field",
+      "Submit and note down your Registration Number for tracking"
+    ]
+  },
+  "Punjab": {
+    "_state_portal": {
+      "name": "Punjab Government Grievance Portal",
+      "url": "https://pgrs.punjab.gov.in",
+      "officer": "Chief Minister's Grievance Cell, Punjab"
+    },
+    "water_supply": {
+      "name": "PWSSB — Punjab Water Supply & Sewerage Board",
+      "url": "https://pwssb.punjab.gov.in/complaint-form",
+      "officer": "Executive Engineer, PWSSB",
+      "email": "pgro@pwssb.punjab.gov.in",
+      "phone": "1800-1800-0172",
+      "steps": [
+        "Visit pwssb.punjab.gov.in/complaint-form",
+        "Select your district and subdivision",
+        "Enter your address and contact number",
+        "Describe the issue and attach the photo",
+        "Paste the auto-generated petition text in the remarks field",
+        "Submit and save the complaint registration number"
+      ]
+    },
+    "broken_road": {
+      "name": "Punjab PWD — Public Works Department",
+      "url": "https://punjabpwd.gov.in/grievance",
+      "officer": "Superintending Engineer, Punjab PWD",
+      "phone": "0172-2740600",
+      "districts": {
+        "Ludhiana": {
+          "officer": "XEN PWD Ludhiana Division",
+          "mc_portal": { "name": "Municipal Corporation Ludhiana", "url": "https://mcl.punjab.gov.in/complaint" }
+        },
+        "Jalandhar": {
+          "officer": "XEN PWD Jalandhar Division",
+          "mc_portal": { "name": "Municipal Corporation Jalandhar", "url": "https://mcljalandhar.gov.in/complaint" }
+        },
+        "Amritsar": {
+          "officer": "XEN PWD Amritsar Division",
+          "mc_portal": { "name": "Municipal Corporation Amritsar", "url": "https://mca.punjab.gov.in/complaint" }
+        },
+        "Patiala": {
+          "officer": "XEN PWD Patiala Division",
+          "mc_portal": { "name": "Municipal Corporation Patiala", "url": "https://pgportal.gov.in" }
+        }
+      },
+      "steps": [
+        "Visit punjabpwd.gov.in/grievance",
+        "Select your district from the dropdown",
+        "For issues inside a city, use the Municipal Corporation portal link provided",
+        "Attach the complaint photo as evidence",
+        "Paste the petition text in the description",
+        "Submit and note the grievance number"
+      ]
+    },
+    "streetlight": {
+      "name": "PSPCL — Punjab State Power Corporation",
+      "url": "https://pspcl.in/consumer-grievance",
+      "officer": "SDO, PSPCL",
+      "phone": "1912",
+      "steps": [
+        "Call the PSPCL helpline 1912 for immediate complaint",
+        "Or visit pspcl.in/consumer-grievance",
+        "Select your subdivision and SDO office",
+        "Submit with photo evidence and the petition text"
+      ]
+    },
+    "sewage": {
+      "name": "PWSSB Sewerage Wing",
+      "url": "https://pwssb.punjab.gov.in/complaint-form",
+      "officer": "Executive Engineer (Sewerage), PWSSB",
+      "phone": "1800-1800-0172",
+      "steps": [
+        "Visit pwssb.punjab.gov.in/complaint-form",
+        "Select 'Sewerage' as the complaint category",
+        "Enter your district and locality details",
+        "Attach the photo and paste the petition text",
+        "Submit and note the complaint ID"
+      ]
+    },
+    "waterlogging": {
+      "name": "Punjab PWD (Drainage) / Municipal Corporation",
+      "url": "https://pgrs.punjab.gov.in",
+      "officer": "Executive Engineer, Drainage Division",
+      "steps": [
+        "For city areas, contact the Municipal Corporation drainage department",
+        "For areas outside city limits, visit pgrs.punjab.gov.in",
+        "Select 'Public Works' as the department",
+        "Attach the photo showing the waterlogging",
+        "Submit with the petition text"
+      ]
+    },
+    "garbage": {
+      "name": "Municipal Corporation / Punjab Pollution Control Board",
+      "url": "https://pgrs.punjab.gov.in",
+      "officer": "Sanitation Officer, Municipal Corporation",
+      "steps": [
+        "For city garbage: contact your local Municipal Corporation",
+        "Visit pgrs.punjab.gov.in for online submission",
+        "Select 'Urban Development' > 'Sanitation'",
+        "Attach the photo and submit with the petition text"
+      ]
+    }
+  },
+  "Uttar Pradesh": {
+    "_state_portal": {
+      "name": "Jansunwai — UP Integrated Grievance Redressal System",
+      "url": "https://jansunwai.up.nic.in",
+      "officer": "Chief Minister's Office, UP"
+    },
+    "broken_road": {
+      "name": "Jansunwai UP — Roads & Highways",
+      "url": "https://jansunwai.up.nic.in",
+      "officer": "Executive Engineer, PWD UP",
+      "phone": "1800-180-5155",
+      "steps": [
+        "Visit jansunwai.up.nic.in",
+        "Register with your mobile number (OTP verification)",
+        "Click 'Submit Grievance' and select 'Public Works Department'",
+        "Fill in your location details and complaint description",
+        "Attach the complaint photo",
+        "Paste the petition text in the grievance details field",
+        "Submit and note your grievance registration number"
+      ]
+    },
+    "water_supply": {
+      "name": "Jal Jeevan Mission UP / Jansunwai",
+      "url": "https://jansunwai.up.nic.in",
+      "officer": "Executive Engineer, Jal Nigam",
+      "phone": "1800-180-5155",
+      "steps": [
+        "Visit jansunwai.up.nic.in",
+        "Register and select 'Jal Nigam' as the department",
+        "Submit complaint with photo and petition text"
+      ]
+    },
+    "streetlight": {
+      "name": "UPPCL — UP Power Corporation",
+      "url": "https://www.uppclonline.com/grievance",
+      "officer": "SDO, UPPCL",
+      "phone": "1912",
+      "steps": [
+        "Call 1912 for immediate reporting",
+        "Or visit uppclonline.com/grievance",
+        "Submit with the photo and petition text"
+      ]
+    },
+    "sewage": {
+      "name": "Jansunwai UP",
+      "url": "https://jansunwai.up.nic.in",
+      "officer": "Executive Engineer, Jal Nigam (Sewerage)",
+      "phone": "1800-180-5155",
+      "steps": [
+        "Visit jansunwai.up.nic.in",
+        "Select Jal Nigam > Sewerage division",
+        "Submit with photo and petition text"
+      ]
+    },
+    "waterlogging": {
+      "name": "Jansunwai UP",
+      "url": "https://jansunwai.up.nic.in",
+      "officer": "Executive Engineer, Drainage Department, UP",
+      "phone": "1800-180-5155",
+      "steps": [
+        "Visit jansunwai.up.nic.in",
+        "Select PWD > Drainage",
+        "Submit with photo and petition text"
+      ]
+    },
+    "garbage": {
+      "name": "Jansunwai UP",
+      "url": "https://jansunwai.up.nic.in",
+      "officer": "Nagar Palika / Nagar Nigam Sanitation Officer",
+      "phone": "1800-180-5155",
+      "steps": [
+        "Visit jansunwai.up.nic.in",
+        "Select Urban Development > Sanitation",
+        "Submit with photo and petition text"
+      ]
+    }
+  },
+  "Delhi": {
+    "_state_portal": {
+      "name": "Delhi PGMS",
+      "url": "https://pgms.delhi.gov.in",
+      "officer": "Chief Minister's Office, Delhi"
+    },
+    "broken_road": {
+      "name": "Delhi PGMS / PWD Delhi",
+      "url": "https://pgms.delhi.gov.in",
+      "officer": "Executive Engineer, PWD Delhi",
+      "phone": "011-23392413",
+      "steps": [
+        "Visit pgms.delhi.gov.in",
+        "Create account and select PWD as department",
+        "Submit complaint with photo and petition text"
+      ]
+    },
+    "water_supply": {
+      "name": "Delhi Jal Board",
+      "url": "https://www.delhijalboard.in/grievance",
+      "officer": "Executive Engineer, Delhi Jal Board",
+      "phone": "1916",
+      "steps": [
+        "Call 1916 for immediate complaint",
+        "Or visit delhijalboard.in/grievance",
+        "Submit with photo evidence and petition text"
+      ]
+    },
+    "streetlight": {
+      "name": "BSES / TPDDL Grievance",
+      "url": "https://pgms.delhi.gov.in",
+      "officer": "SDO, Delhi Electricity Department",
+      "phone": "19123",
+      "steps": [
+        "Call 19123 for power issues",
+        "Or visit pgms.delhi.gov.in > Electricity Department"
+      ]
+    },
+    "sewage": {
+      "name": "Delhi Jal Board (Sewerage)",
+      "url": "https://www.delhijalboard.in/grievance",
+      "officer": "Executive Engineer (Sewerage), DJB",
+      "phone": "1916",
+      "steps": [
+        "Call 1916 or visit delhijalboard.in/grievance",
+        "Select Sewerage category",
+        "Submit with photo and petition"
+      ]
+    },
+    "waterlogging": {
+      "name": "Delhi PGMS / PWD Drainage",
+      "url": "https://pgms.delhi.gov.in",
+      "officer": "Executive Engineer, Drainage, PWD Delhi",
+      "steps": [
+        "Visit pgms.delhi.gov.in",
+        "Select PWD > Drainage",
+        "Submit with photo"
+      ]
+    },
+    "garbage": {
+      "name": "MCD Grievance Portal",
+      "url": "https://mcdonline.nic.in/portal/grievance",
+      "officer": "Sanitation Inspector, MCD",
+      "phone": "1533",
+      "steps": [
+        "Call 1533 for immediate complaint",
+        "Or visit mcdonline.nic.in/portal/grievance",
+        "Submit with photo and petition"
+      ]
+    }
+  },
+  "Maharashtra": {
+    "_state_portal": {
+      "name": "Maharashtra Aaple Sarkar",
+      "url": "https://aaplesarkar.mahaonline.gov.in",
+      "officer": "Chief Minister's Helpline 1800"
+    },
+    "broken_road": {
+      "name": "Maharashtra PWD Grievance",
+      "url": "https://aaplesarkar.mahaonline.gov.in",
+      "officer": "Executive Engineer, Maharashtra PWD",
+      "phone": "1800-120-8040",
+      "steps": [
+        "Visit aaplesarkar.mahaonline.gov.in",
+        "Login with Aadhaar or mobile",
+        "Select PWD as department and submit"
+      ]
+    },
+    "water_supply": {
+      "name": "Maharashtra Jeevan Pradhikaran",
+      "url": "https://aaplesarkar.mahaonline.gov.in",
+      "officer": "Executive Engineer, MJP",
+      "steps": [
+        "Visit aaplesarkar.mahaonline.gov.in",
+        "Select Water Supply department",
+        "Submit with photo and petition"
+      ]
+    },
+    "garbage": {
+      "name": "BMC/Municipal Corporation Grievance",
+      "url": "https://aaplesarkar.mahaonline.gov.in",
+      "officer": "Sanitation Officer, Municipal Corporation",
+      "steps": [
+        "Visit aaplesarkar.mahaonline.gov.in",
+        "Select Urban Local Body",
+        "Submit sanitation complaint"
+      ]
+    }
+  },
+  "Karnataka": {
+    "_state_portal": {
+      "name": "Karnataka Janasevaka / SOLVIT",
+      "url": "https://janasevaka.karnataka.gov.in",
+      "officer": "Chief Minister's Office, Karnataka"
+    },
+    "broken_road": {
+      "name": "Karnataka PWD Grievance",
+      "url": "https://janasevaka.karnataka.gov.in",
+      "officer": "Executive Engineer, Karnataka PWD",
+      "steps": [
+        "Visit janasevaka.karnataka.gov.in",
+        "Register and select PWD",
+        "Submit complaint with photo"
+      ]
+    },
+    "water_supply": {
+      "name": "BWSSB / KUWSDB",
+      "url": "https://bwssb.gov.in/online-complaint",
+      "officer": "Executive Engineer, BWSSB",
+      "phone": "1916",
+      "steps": [
+        "Visit bwssb.gov.in/online-complaint or call 1916",
+        "Submit with photo and petition text"
+      ]
+    }
+  }
+}

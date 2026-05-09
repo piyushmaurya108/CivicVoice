@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Leaflet container needs an explicit height to render */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  border-radius: 0.75rem;
+}
+
+/* Make map controls a bit nicer */
+.leaflet-control-attribution {
+  font-size: 10px !important;
+}
+
+/* Smooth focus rings */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
