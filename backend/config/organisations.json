@@ -1,0 +1,115 @@
+{
+  "_meta": {
+    "lastUpdated": "2025-06",
+    "note": "Verify contact details on each organisation's official website before relying on them."
+  },
+  "_rti": {
+    "name": "RTI Online",
+    "kind": "Government platform",
+    "description": "File a Right to Information request to legally compel an official, written explanation when a complaint is ignored.",
+    "website": "https://rtionline.gov.in",
+    "phone": null,
+    "twitter": null,
+    "tip": "Filing an RTI is a powerful, low-cost way to demand an official explanation and force accountability if your complaint goes unanswered. The fee is usually just ₹10."
+  },
+  "national": [
+    {
+      "name": "Janaagraha",
+      "kind": "NGO",
+      "description": "Works on citizen participation and quality of urban governance and infrastructure across India.",
+      "website": "https://www.janaagraha.org",
+      "phone": null,
+      "twitter": "https://x.com/janaagraha",
+      "types": "all"
+    },
+    {
+      "name": "Swechha",
+      "kind": "NGO",
+      "description": "Youth-led NGO focused on environment, sanitation, waste and water-body conservation.",
+      "website": "https://www.swechha.in",
+      "phone": null,
+      "twitter": null,
+      "types": ["garbage", "sewage", "water_supply", "waterlogging", "other"]
+    },
+    {
+      "name": "PRS Legislative Research",
+      "kind": "Civic platform",
+      "description": "Independent research on laws, policies and the working of government — useful to understand which authority is responsible.",
+      "website": "https://prsindia.org",
+      "phone": null,
+      "twitter": "https://x.com/PRSLegislative",
+      "types": "all"
+    },
+    {
+      "name": "LocalCircles",
+      "kind": "Civic platform",
+      "description": "Community platform that aggregates citizen issues and escalates them to authorities and policymakers.",
+      "website": "https://www.localcircles.com",
+      "phone": null,
+      "twitter": "https://x.com/LocalCircles",
+      "types": "all"
+    },
+    {
+      "name": "National Human Rights Commission (NHRC)",
+      "kind": "Government body",
+      "description": "Statutory body that can be approached when civic neglect amounts to a violation of basic rights (health, sanitation, safety).",
+      "website": "https://nhrc.nic.in",
+      "phone": "14433",
+      "twitter": "https://x.com/India_NHRC",
+      "types": "all"
+    }
+  ],
+  "states": {
+    "Punjab": [
+      {
+        "name": "Punjab Voluntary Health Association",
+        "kind": "NGO",
+        "description": "State health NGO active on water, sanitation and public-health issues in Punjab.",
+        "website": null,
+        "phone": null,
+        "twitter": null,
+        "types": ["water_supply", "sewage", "garbage", "other"]
+      },
+      {
+        "name": "Eco Needs Foundation",
+        "kind": "NGO",
+        "description": "Environmental NGO working on waste management, sanitation and ecological awareness.",
+        "website": null,
+        "phone": null,
+        "twitter": null,
+        "types": ["garbage", "waterlogging", "sewage", "other"]
+      }
+    ],
+    "Delhi": [
+      {
+        "name": "Toxics Link",
+        "kind": "NGO",
+        "description": "Delhi-based environmental NGO specialising in waste, pollution and toxic-hazard issues.",
+        "website": "https://toxicslink.org",
+        "phone": null,
+        "twitter": null,
+        "types": ["garbage", "sewage", "water_supply", "other"]
+      },
+      {
+        "name": "Delhi Greens",
+        "kind": "NGO",
+        "description": "Environmental NGO working on green spaces, sanitation and urban ecology in Delhi.",
+        "website": "https://delhigreens.com",
+        "phone": null,
+        "twitter": null,
+        "types": ["garbage", "waterlogging", "other"]
+      }
+    ],
+    "Uttar Pradesh": [
+      {
+        "name": "Parivartan",
+        "kind": "Civic platform",
+        "description": "Citizen-action initiative known for RTI-driven accountability on public services and civic works.",
+        "website": null,
+        "phone": null,
+        "twitter": null,
+        "types": "all"
+      }
+    ]
+  }
+}

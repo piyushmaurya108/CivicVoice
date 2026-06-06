@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import {
   CheckCircle2,
   Copy,
-  ExternalLink,
-  Phone,
-  Mail,
   Send,
   Loader2,
   RotateCcw,
@@ -16,6 +13,9 @@ import {
 import toast from 'react-hot-toast';
 import ImageUploader from '../components/ImageUploader.jsx';
 import ComplaintMap from '../components/ComplaintMap.jsx';
+import PortalSuggestions from '../components/PortalSuggestions.jsx';
+import RepresentativesSection from '../components/RepresentativesSection.jsx';
+import OrganisationsSection from '../components/OrganisationsSection.jsx';
 import {
   describeError,
   submitComplaint as apiSubmitComplaint
@@ -27,6 +27,7 @@ import {
 } from '../utils/formatters.js';
 
 const MAX_DESC = 500;
+const MIN_DESC = 20;
 
 export default function SubmitComplaint() {
   const [image, setImage] = useState(null);
@@ -34,12 +35,16 @@ export default function SubmitComplaint() {
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [result, setResult] = useState(null); // { complaint, portal, petitionText, nearbyCount }
+  const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
+  const descLen = description.trim().length;
+  const descValid = descLen >= MIN_DESC;
+
+  // Photo is optional now; description (>=20) + location are required (Change 2)
   const canSubmit = useMemo(
-    () => Boolean(image && picked && !submitting),
-    [image, picked, submitting]
+    () => Boolean(picked && descValid && !submitting),
+    [picked, descValid, submitting]
   );
 
   const reset = () => {
@@ -54,19 +59,22 @@ export default function SubmitComplaint() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit) {
+      if (!descValid) setError(`Please describe the issue in at least ${MIN_DESC} characters.`);
+      return;
+    }
 
     setSubmitting(true);
     setError(null);
     setProgress(0);
 
-    const toastId = toast.loading('Uploading photo…');
+    const toastId = toast.loading(image ? 'Uploading photo…' : 'Analysing your report…');
     try {
       const data = await apiSubmitComplaint({
-        image,
+        image: image || undefined,
         latitude: picked.lat,
         longitude: picked.lng,
-        description: description.trim() || undefined,
+        description: description.trim(),
         onUploadProgress: (evt) => {
           if (evt.total) setProgress(Math.round((evt.loaded / evt.total) * 100));
         }
@@ -74,7 +82,6 @@ export default function SubmitComplaint() {
 
       toast.success('Complaint submitted! Petition is ready.', { id: toastId });
       setResult(data);
-      // smooth scroll to top so the result panel is in view
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       const msg = describeError(err);
@@ -104,43 +111,57 @@ export default function SubmitComplaint() {
               Report a civic problem
             </h1>
             <p className="mt-1 text-sm text-gray-600">
-              Upload a photo and pin the location. We'll identify the issue, find similar
-              reports nearby, and prepare a formal petition for the right authority.
+              Describe the issue and pin the location. A photo is optional but helps. We'll
+              identify the issue, find similar reports nearby, and prepare a formal petition
+              for the right authority.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* LEFT */}
             <div className="space-y-5 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-              <ImageUploader value={image} onChange={setImage} />
-
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <label
                     htmlFor="description"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Description <span className="text-gray-400">(optional)</span>
+                    Description <span className="text-red-500">*</span>
                   </label>
                   <span
                     className={`text-xs ${
-                      description.length > MAX_DESC - 50
+                      descLen > MAX_DESC - 50
                         ? 'text-amber-600'
+                        : descValid
+                        ? 'text-green-600'
                         : 'text-gray-400'
                     }`}
                   >
-                    {description.length}/{MAX_DESC}
+                    {descLen}/{MAX_DESC}
+                    {!descValid && ` · min ${MIN_DESC}`}
                   </span>
                 </div>
                 <textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESC))}
-                  rows={4}
-                  placeholder="Add any extra context: how long the problem has existed, who's affected, etc."
-                  className="block w-full resize-none rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  rows={5}
+                  placeholder="Describe the problem: what it is, how long it's been there, who's affected. (At least 20 characters)"
+                  className={`block w-full resize-none rounded-md border bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:ring-1 ${
+                    description && !descValid
+                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                      : 'border-gray-300 focus:border-brand-500 focus:ring-brand-500'
+                  }`}
                 />
+                {description && !descValid && (
+                  <p className="mt-1 text-xs text-red-600">
+                    Please write at least {MIN_DESC} characters ({MIN_DESC - descLen} more to
+                    go).
+                  </p>
+                )}
               </div>
+
+              <ImageUploader value={image} onChange={setImage} />
 
               {error && (
                 <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -176,10 +197,10 @@ export default function SubmitComplaint() {
 
                 {!canSubmit && !submitting && (
                   <p className="text-center text-xs text-gray-500">
-                    {!image && !picked
-                      ? 'Add a photo and pick a location to continue.'
-                      : !image
-                      ? 'Add a photo to continue.'
+                    {!descValid && !picked
+                      ? 'Write a description and pick a location to continue.'
+                      : !descValid
+                      ? `Add a description of at least ${MIN_DESC} characters to continue.`
                       : 'Pick a location on the map to continue.'}
                   </p>
                 )}
@@ -194,7 +215,7 @@ export default function SubmitComplaint() {
               <ComplaintMap
                 pickedLocation={picked}
                 onLocationPick={setPicked}
-                height="420px"
+                height="460px"
               />
             </div>
           </form>
@@ -211,9 +232,11 @@ export default function SubmitComplaint() {
 }
 
 function ResultPanel({ result, onReset, onCopyPetition }) {
-  const { complaint, portal, petitionText, nearbyCount } = result;
+  const { complaint, portal, portals, petitionText, nearbyCount, representatives, organisations } =
+    result;
   const typeLabel = TYPE_LABELS[complaint?.type] || 'Issue';
   const isCluster = nearbyCount > 1;
+  const portalList = portals && portals.length ? portals : portal ? [portal] : [];
 
   return (
     <div className="space-y-6">
@@ -231,14 +254,15 @@ function ResultPanel({ result, onReset, onCopyPetition }) {
             <p className="mt-1 text-sm text-green-800">
               {isCluster ? (
                 <>
-                  <strong>{nearbyCount}</strong> citizens have now reported a similar{' '}
-                  <strong>{typeLabel.toLowerCase()}</strong> within 500 metres of this
-                  location. Your collective petition is ready below.
+                  <strong>{nearbyCount}</strong> reports of a similar{' '}
+                  <strong>{typeLabel.toLowerCase()}</strong> exist within 500 metres of this
+                  location. Your petition is ready below.
                 </>
               ) : (
                 <>
-                  You're the first to report this <strong>{typeLabel.toLowerCase()}</strong>{' '}
-                  in this area. Your petition is ready below.
+                  This is the first report of this{' '}
+                  <strong>{typeLabel.toLowerCase()}</strong> in this area. Your petition is
+                  ready below.
                 </>
               )}
             </p>
@@ -247,11 +271,7 @@ function ResultPanel({ result, onReset, onCopyPetition }) {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <SummaryStat
-          icon={Users}
-          label="Citizens reporting"
-          value={nearbyCount}
-        />
+        <SummaryStat icon={Users} label="Reports nearby" value={nearbyCount} />
         <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-gray-500">Issue type</div>
           <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -275,61 +295,6 @@ function ResultPanel({ result, onReset, onCopyPetition }) {
         </div>
       </div>
 
-      {/* Portal */}
-      {portal && (
-        <section className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Submit your petition to
-          </h3>
-          <p className="mt-1 text-lg font-semibold text-gray-900">{portal.name}</p>
-          {portal.officer && (
-            <p className="mt-0.5 text-sm text-gray-600">Officer: {portal.officer}</p>
-          )}
-          <div className="mt-4 flex flex-wrap gap-2">
-            {portal.url && (
-              <a
-                href={portal.url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-              >
-                <ExternalLink size={14} />
-                Open portal
-              </a>
-            )}
-            {portal.phone && (
-              <a
-                href={`tel:${portal.phone}`}
-                className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                <Phone size={14} />
-                {portal.phone}
-              </a>
-            )}
-            {portal.email && (
-              <a
-                href={`mailto:${portal.email}`}
-                className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                <Mail size={14} />
-                {portal.email}
-              </a>
-            )}
-          </div>
-
-          {Array.isArray(portal.steps) && portal.steps.length > 0 && (
-            <div className="mt-5">
-              <h4 className="text-sm font-semibold text-gray-700">Submission steps</h4>
-              <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-gray-700">
-                {portal.steps.map((step, i) => (
-                  <li key={i}>{step}</li>
-                ))}
-              </ol>
-            </div>
-          )}
-        </section>
-      )}
-
       {/* Petition */}
       {petitionText && (
         <section className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -350,11 +315,26 @@ function ResultPanel({ result, onReset, onCopyPetition }) {
             {petitionText}
           </pre>
           <p className="mt-3 text-xs text-gray-500">
-            Tip: paste this text into the description / remarks field on the portal above and attach
-            the same photo as evidence.
+            Tip: paste this text into the description / remarks field on a portal below
+            {complaint?.imageUrl ? ' and attach the same photo as evidence' : ''}.
           </p>
         </section>
       )}
+
+      {/* Ranked portals (Change 4) */}
+      {portalList.length > 0 && <PortalSuggestions portals={portalList} />}
+
+      {/* Representatives (Change 6) */}
+      {representatives && (
+        <RepresentativesSection
+          data={representatives}
+          type={complaint?.type}
+          address={complaint?.address}
+        />
+      )}
+
+      {/* Organisations (Change 7) */}
+      {organisations && <OrganisationsSection data={organisations} />}
 
       <div className="flex flex-wrap gap-3">
         <button

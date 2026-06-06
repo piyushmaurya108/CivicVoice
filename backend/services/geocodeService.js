@@ -3,6 +3,7 @@ const axios = require('axios');
 /**
  * Reverse geocode (lat, lng) using Nominatim (OpenStreetMap).
  * Free, no API key needed. Always returns — never throws.
+ * Adds `areaType` ('city' | 'town' | 'village' | null) for portal routing (Change 4).
  */
 async function reverseGeocode(lat, lng) {
   try {
@@ -14,6 +15,11 @@ async function reverseGeocode(lat, lng) {
 
     const addr = response.data.address || {};
 
+    let areaType = null;
+    if (addr.city) areaType = 'city';
+    else if (addr.town) areaType = 'town';
+    else if (addr.village || addr.hamlet) areaType = 'village';
+
     return {
       ward: addr.suburb || addr.neighbourhood || addr.quarter || null,
       locality: addr.suburb || addr.village || addr.town || addr.neighbourhood || null,
@@ -21,6 +27,7 @@ async function reverseGeocode(lat, lng) {
       district: addr.county || addr.state_district || null,
       state: addr.state || null,
       pincode: addr.postcode || null,
+      areaType,
       fullAddress: response.data.display_name || null
     };
   } catch (error) {
@@ -32,6 +39,7 @@ async function reverseGeocode(lat, lng) {
       district: null,
       state: null,
       pincode: null,
+      areaType: null,
       fullAddress: null
     };
   }

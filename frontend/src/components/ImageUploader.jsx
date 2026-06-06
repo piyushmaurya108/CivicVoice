@@ -57,7 +57,8 @@ export default function ImageUploader({ value, onChange }) {
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700">
-        Photo of the issue <span className="text-red-500">*</span>
+        Photo of the issue{' '}
+        <span className="font-normal text-gray-400">(optional, but recommended)</span>
       </label>
 
       <div
@@ -103,7 +104,7 @@ export default function ImageUploader({ value, onChange }) {
             <p className="text-sm font-medium text-gray-700">
               {isDragActive ? 'Drop the photo here' : 'Drag a photo here, or click to choose'}
             </p>
-            <p className="text-xs text-gray-500">JPEG, PNG, or WebP · max 5 MB</p>
+            <p className="text-xs text-gray-500">JPEG, PNG, or WebP · max 5 MB · adding a photo improves AI analysis</p>
           </div>
         )}
       </div>

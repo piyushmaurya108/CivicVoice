@@ -44,10 +44,10 @@ export function describeError(err) {
 
 export async function submitComplaint({ image, latitude, longitude, description, onUploadProgress }) {
   const formData = new FormData();
-  formData.append('image', image);
+  if (image) formData.append('image', image); // photo is now optional (Change 2)
   formData.append('latitude', String(latitude));
   formData.append('longitude', String(longitude));
-  if (description) formData.append('description', description);
+  formData.append('description', description || ''); // description is mandatory
 
   const { data } = await api.post('/complaints', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -84,6 +84,20 @@ export async function fetchPortal({ state, district, city, type }) {
   const { data } = await api.get('/portals', {
     params: { state, district, city, type }
   });
+  return data;
+}
+
+// ──────────────────── Representatives & Organisations ────────────
+
+export async function fetchRepresentatives({ state, city, district } = {}) {
+  const { data } = await api.get('/representatives', {
+    params: { state, city, district }
+  });
+  return data;
+}
+
+export async function fetchOrganisations({ type, state } = {}) {
+  const { data } = await api.get('/organisations', { params: { type, state } });
   return data;
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   MapContainer,
   TileLayer,
@@ -11,7 +11,7 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { MapPin, LocateFixed, Loader2 } from 'lucide-react';
+import { MapPin, LocateFixed, Loader2, MousePointerClick, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   TYPE_LABELS,
@@ -20,6 +20,7 @@ import {
   shortAddress
 } from '../utils/formatters.js';
 import useGeolocation from '../hooks/useGeolocation.js';
+import AddressSearch from './AddressSearch.jsx';
 
 // Fix Leaflet's default marker icon paths (broken by Vite's bundler)
 delete L.Icon.Default.prototype._getIconUrl;
@@ -73,22 +74,37 @@ function FlyTo({ target, zoom = 15 }) {
   return null;
 }
 
+// Picker-method toggle button
+function MethodButton({ active, onClick, icon: Icon, label }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+        active
+          ? 'bg-brand-600 text-white shadow-sm'
+          : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+      }`}
+      aria-pressed={active}
+    >
+      <Icon size={15} aria-hidden />
+      {label}
+    </button>
+  );
+}
+
 /**
  * ComplaintMap
  *
- * Picker mode (default): user clicks the map or hits "Use my GPS" to choose a coordinate.
- *   props: pickedLocation, onLocationPick, height
+ * Picker mode (onLocationPick prop present): three ways to set a location —
+ *   Click Map · Use GPS · Search Address (cascading dropdowns).  (Change 3)
  *
- * Feed mode: pass `complaints` to render colour-coded markers; clicking opens a popup.
- *   props: complaints, height, onMarkerClick (optional)
+ * Feed mode: pass `complaints` to render colour-coded markers.
  */
 export default function ComplaintMap({
-  // picker mode
   pickedLocation = null,
   onLocationPick,
-  // feed/detail mode
   complaints = null,
-  // common
   height = '400px',
   initialCenter = INDIA_CENTER,
   initialZoom = INDIA_ZOOM
@@ -96,6 +112,10 @@ export default function ComplaintMap({
   const isPicker = typeof onLocationPick === 'function';
   const { getLocation, loading: gpsLoading } = useGeolocation();
   const mapRef = useRef(null);
+
+  const [method, setMethod] = useState('click'); // 'click' | 'gps' | 'address'
+  const [flyTarget, setFlyTarget] = useState(null); // address-search parallel zoom
+  const [flyZoom, setFlyZoom] = useState(7);
 
   const handleGPS = async () => {
     try {
@@ -106,27 +126,63 @@ export default function ComplaintMap({
     }
   };
 
+  const handleAddressZoom = (target, zoom) => {
+    setFlyTarget({ ...target, _t: Date.now() }); // _t forces re-fly even for same coords
+    setFlyZoom(zoom);
+  };
+
   return (
     <div className="space-y-2">
       {isPicker && (
-        <div className="flex flex-wrap gap-2">
-          <div className="inline-flex items-center gap-2 rounded-md border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700">
-            <MapPin size={16} aria-hidden />
-            <span>Click map to drop a pin</span>
+        <div className="space-y-2">
+          {/* Method toggle (Change 3) */}
+          <div className="flex flex-wrap gap-2">
+            <MethodButton
+              active={method === 'click'}
+              onClick={() => setMethod('click')}
+              icon={MousePointerClick}
+              label="Click Map"
+            />
+            <MethodButton
+              active={method === 'gps'}
+              onClick={() => setMethod('gps')}
+              icon={LocateFixed}
+              label="Use GPS"
+            />
+            <MethodButton
+              active={method === 'address'}
+              onClick={() => setMethod('address')}
+              icon={Search}
+              label="Search Address"
+            />
           </div>
-          <button
-            type="button"
-            onClick={handleGPS}
-            disabled={gpsLoading}
-            className="inline-flex items-center gap-2 rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {gpsLoading ? (
-              <Loader2 size={16} className="animate-spin" aria-hidden />
-            ) : (
-              <LocateFixed size={16} aria-hidden />
-            )}
-            {gpsLoading ? 'Locating…' : 'Use my GPS location'}
-          </button>
+
+          {method === 'click' && (
+            <div className="inline-flex items-center gap-2 rounded-md border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700">
+              <MapPin size={16} aria-hidden />
+              <span>Click anywhere on the map to drop a pin</span>
+            </div>
+          )}
+
+          {method === 'gps' && (
+            <button
+              type="button"
+              onClick={handleGPS}
+              disabled={gpsLoading}
+              className="inline-flex items-center gap-2 rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {gpsLoading ? (
+                <Loader2 size={16} className="animate-spin" aria-hidden />
+              ) : (
+                <LocateFixed size={16} aria-hidden />
+              )}
+              {gpsLoading ? 'Locating…' : 'Use my GPS location'}
+            </button>
+          )}
+
+          {method === 'address' && (
+            <AddressSearch onZoom={handleAddressZoom} onPick={onLocationPick} />
+          )}
         </div>
       )}
 
@@ -148,6 +204,8 @@ export default function ComplaintMap({
 
           {/* PICKER MODE */}
           {isPicker && <PickerHandler onPick={onLocationPick} />}
+          {/* Address-search parallel zoom (no pin) */}
+          {isPicker && flyTarget && <FlyTo target={flyTarget} zoom={flyZoom} />}
           {isPicker && pickedLocation && (
             <>
               <FlyTo target={pickedLocation} zoom={15} />
@@ -198,8 +256,6 @@ export default function ComplaintMap({
                 </Marker>
               );
             })}
-
-          {/* Single complaint detail mode (passed as a 1-element array) */}
         </MapContainer>
       </div>
 

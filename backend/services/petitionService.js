@@ -1,17 +1,18 @@
 const { draftPetition } = require('./geminiService');
 
 /**
- * Generate a petition letter for a complaint cluster.
- * Wraps geminiService.draftPetition with sensible defaults.
+ * Generate a specific petition letter for a single anonymous citizen (Change 5).
+ * Note: nearbyCount is intentionally NOT passed/used — the letter never mentions counts.
  */
-async function generatePetition({ type, severity, aiDescription, address, nearbyCount, portal }) {
+async function generatePetition({ type, severity, userDescription, aiDescription, address, portal }) {
   return draftPetition({
     type,
     severity,
-    aiDescription: aiDescription || 'A civic infrastructure issue requiring urgent attention',
+    userDescription: userDescription || '',
+    aiDescription: aiDescription || '',
     address: address || {},
-    nearbyCount: nearbyCount || 1,
-    portalOfficer: portal?.officer || 'The Concerned Government Authority'
+    portalOfficer: portal?.officer || 'The Concerned Government Authority',
+    portalName: portal?.name || ''
   });
 }
 

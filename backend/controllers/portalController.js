@@ -1,11 +1,12 @@
-const { findPortal } = require('../utils/portalMatcher');
+const { findPortal, findPortals } = require('../utils/portalMatcher');
 
 /**
  * GET /api/portals?state=&district=&city=&type=
+ * Returns the ranked list of portals (Change 4) plus the top one (backward compat).
  */
 function getPortal(req, res, next) {
   try {
-    const { state, district, city, type } = req.query;
+    const { state, district, city, type, areaType } = req.query;
 
     if (!type) {
       return res.status(400).json({
@@ -14,12 +15,15 @@ function getPortal(req, res, next) {
       });
     }
 
-    const portal = findPortal(state, district, city, type);
+    const address = { state, district, city, areaType };
+    const portals = findPortals(state, district, city, type, address);
+    const portal = findPortal(state, district, city, type, address);
 
     return res.json({
       success: true,
       portal,
-      query: { state, district, city, type }
+      portals,
+      query: { state, district, city, type, areaType }
     });
   } catch (error) {
     return next(error);

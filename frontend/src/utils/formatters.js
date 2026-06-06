@@ -37,12 +37,6 @@ export const SEVERITY_OPTIONS = [
   { value: 'critical', label: 'Critical' }
 ];
 
-export const STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'under_review', label: 'Under Review' },
-  { value: 'resolved', label: 'Resolved' }
-];
-
 export function formatDate(dateInput) {
   if (!dateInput) return '';
   const d = new Date(dateInput);
@@ -106,6 +100,12 @@ export function fullAddress(address) {
       .filter(Boolean)
       .join(', ')
   );
+}
+
+// "Reported on 05 Jun 2025" — the only date-tracking that remains (Change 1)
+export function reportedOn(dateInput) {
+  const d = formatDate(dateInput);
+  return d ? `Reported on ${d}` : '';
 }
 
 export function severityBadgeClass(severity) {

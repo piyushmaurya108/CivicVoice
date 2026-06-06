@@ -8,7 +8,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Complaint = require('./models/Complaint');
-const { findPortal } = require('./utils/portalMatcher');
+const { findPortal, findPortals } = require('./utils/portalMatcher');
 
 if (!process.env.MONGODB_URI) {
   console.error('❌ MONGODB_URI not set in .env');
@@ -29,19 +29,32 @@ const TYPE_LABELS = {
   other: 'civic infrastructure issue'
 };
 
-// Build a templated petition for seed data (no AI calls needed)
-function makePetition({ type, severity, address, nearbyCount, officer }) {
+// Type → specific demanded action (mirrors geminiService)
+const TYPE_DEMANDS = {
+  broken_road: 'repair/re-lay the damaged road surface and fill the potholes to restore safe motorable condition',
+  waterlogging: 'clear and de-silt the storm-water drains and undertake permanent drainage works to prevent recurrence',
+  garbage: 'arrange immediate lifting of the accumulated garbage and restore regular door-to-door collection',
+  streetlight: 'repair or replace the non-functional streetlight(s) and restore lighting on this stretch on priority',
+  sewage: 'clear the sewage overflow, unblock the affected sewer line/manhole, and disinfect the area',
+  water_supply: 'restore regular and adequate drinking-water supply and inspect the supply line for leakage',
+  other: 'depute the concerned official for a site inspection and undertake the necessary remedial work'
+};
+
+// Build a specific petition for a SINGLE anonymous citizen (no counts) — Change 5
+function makePetition({ type, severity, address, officer, description }) {
   const today = new Date().toLocaleDateString('en-IN', {
     day: '2-digit',
     month: 'long',
     year: 'numeric'
   });
 
-  const fullLoc = [address.locality, address.city, address.district, address.state]
+  const subjectLoc = [address.locality, address.city].filter(Boolean).join(', ');
+  const fullLoc = [address.ward, address.locality, address.city, address.district, address.state, address.pincode]
     .filter(Boolean)
     .join(', ');
+  const demand = TYPE_DEMANDS[type] || TYPE_DEMANDS.other;
 
-  return `Subject: Urgent Grievance Regarding ${TYPE_LABELS[type]} at ${address.locality || address.city}
+  return `Subject: ${TYPE_LABELS[type].charAt(0).toUpperCase() + TYPE_LABELS[type].slice(1)} at ${subjectLoc}
 
 Date: ${today}
 
@@ -50,16 +63,16 @@ ${officer}
 
 Respected Sir/Madam,
 
-We, the undersigned residents of ${fullLoc}, wish to bring to your urgent attention a serious ${TYPE_LABELS[type]} affecting our community. The issue has persisted for several days and is causing major inconvenience to residents, daily commuters, school children, and the elderly.
+I am a resident of ${fullLoc}, and I wish to bring to your urgent attention a serious ${TYPE_LABELS[type]} in my area. ${description}
 
-This grievance has now been reported by ${nearbyCount} concerned citizens within a 500-metre radius. The severity is assessed as ${severity}, and continued inaction is creating a public safety risk. We have documented the problem with photographs which are attached to this petition.
+The problem is located in Ward ${address.ward}, ${address.locality}, ${address.city}, ${address.district} district, ${address.state} (PIN ${address.pincode}). The severity of the situation is ${severity}, and it is causing real hardship and a public-safety risk to people using this area daily.
 
-We respectfully demand that your office take immediate action within the next 7 working days — including a site inspection, repair or remedial work, and a written update to the citizens. As taxpayers, we have a fundamental right to functional civic infrastructure.
+I respectfully request your office to ${demand}, within the next 7 working days, and to provide me a written update on the action taken. As a law-abiding citizen and taxpayer, I rely on your office to ensure basic, functional civic infrastructure and timely redressal of this grievance.
 
-We trust this matter will receive the urgency it deserves.
+I trust this matter will receive the urgency it deserves.
 
 Yours faithfully,
-Concerned Citizens of ${address.locality || address.city}, ${address.city || address.state} (${nearbyCount} residents)`;
+A Concerned Citizen of ${subjectLoc}`;
 }
 
 // Real-ish coordinates near city centres
@@ -148,6 +161,18 @@ const SEEDS = [
     daysOld: 3 }
 ];
 
+
+// Per-type seed descriptions (>= 20 chars; description is now mandatory) — Change 2
+const SEED_DESCRIPTIONS = {
+  broken_road: 'The road here has large potholes and a broken, uneven surface that makes it dangerous for two-wheelers and pedestrians, especially after dark.',
+  waterlogging: 'After every spell of rain this stretch gets badly waterlogged for hours, the drains overflow and people are forced to wade through dirty standing water.',
+  garbage: 'Garbage has been piling up at this spot for several days, it is not being lifted regularly, the bins overflow and the stench is unbearable for residents.',
+  streetlight: 'The streetlights on this stretch have not been working for a long time, the entire road stays pitch dark at night which feels unsafe for women and the elderly.',
+  sewage: 'Sewage is overflowing from a blocked manhole here, dirty water has spread across the lane and it has become a serious health hazard for the whole locality.',
+  water_supply: 'We have been facing severe drinking-water supply disruption in this area, the taps run dry for most of the day and the pressure is too low to fill containers.',
+  other: 'There is a persistent civic infrastructure problem at this location that has been neglected for a long time and urgently needs the attention of the authorities.'
+};
+
 async function run() {
   console.log('🌱 Seeding CivicVoice database...\n');
 
@@ -166,6 +191,7 @@ async function run() {
       state: s.state,
       pincode: s.pincode,
       ward: s.locality,
+      areaType: 'city',
       fullAddress: `${s.locality}, ${s.city}, ${s.district}, ${s.state} ${s.pincode}, India`
     };
 
@@ -177,20 +203,22 @@ async function run() {
         Math.abs(x.lng - s.lng) < 0.01
     ).length;
 
-    const portal = findPortal(s.state, s.district, s.city, s.type);
+    const portalsList = findPortals(s.state, s.district, s.city, s.type, address);
+    const portal = portalsList[0];
+    const description = SEED_DESCRIPTIONS[s.type];
 
     const petitionText = makePetition({
       type: s.type,
       severity: s.severity,
       address,
-      nearbyCount,
-      officer: portal.officer || 'The Concerned Authority'
+      officer: portal.officer || 'The Concerned Authority',
+      description
     });
 
     return {
       type: s.type,
       severity: s.severity,
-      description: undefined,
+      description,
       aiDescription: `Seeded ${TYPE_LABELS[s.type]} complaint at ${s.locality}, ${s.city}.`,
       landmark: null,
       aiConfidence: 0.85,
@@ -204,15 +232,15 @@ async function run() {
         officer: portal.officer,
         email: portal.email,
         phone: portal.phone,
+        description: portal.description,
         steps: portal.steps,
         isMunicipal: !!portal.isMunicipal,
         isNational: !!portal.isNational
       },
+      portalSuggestions: portalsList,
       clusterId: `seed-${s.type}-${s.city}`.toLowerCase().replace(/\s+/g, '-'),
       nearbyCount,
       petitionText,
-      status: 'pending',
-      reporterSession: `seed-session-${i + 1}`,
       createdAt: daysAgo(s.daysOld),
       updatedAt: daysAgo(s.daysOld)
     };

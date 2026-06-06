@@ -1,28 +1,27 @@
 const crypto = require('crypto');
 const Complaint = require('../models/Complaint');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
-const { analyseImage } = require('../services/geminiService');
+const { analyseImage, analyseText } = require('../services/geminiService');
 const { reverseGeocode } = require('../services/geocodeService');
 const { findNearbySameType, updateClusterCount } = require('../services/clusterService');
 const { generatePetition } = require('../services/petitionService');
-const { findPortal } = require('../utils/portalMatcher');
+const { findPortals } = require('../utils/portalMatcher');
+const { getRepresentatives } = require('./civicController');
+const { getOrganisationsFor } = require('../config/orgLookup');
+
+const MIN_DESC = 20;
+const MAX_DESC = 500;
 
 /**
  * POST /api/complaints
- * Pipeline: upload → vision → geocode → cluster → portal → petition → save.
+ * Pipeline: validate → (optional) upload → analyse (image or text) → geocode →
+ *           cluster → portals → petition → save.
  */
 async function submitComplaint(req, res, next) {
   let cloudinaryPublicId = null;
 
   try {
-    // 1. Validate
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'Image file is required (field name: "image")'
-      });
-    }
-
+    // 1. Validate location
     const lat = parseFloat(req.body.latitude);
     const lng = parseFloat(req.body.longitude);
 
@@ -38,29 +37,36 @@ async function submitComplaint(req, res, next) {
       });
     }
 
-    const userDescription = (req.body.description || '').trim().slice(0, 500);
-    const reporterSession =
-      req.body.session ||
-      req.headers['x-session-id'] ||
-      crypto.randomBytes(8).toString('hex');
-
-    // 2. Upload to Cloudinary
-    let cloudResult;
-    try {
-      cloudResult = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
-      cloudinaryPublicId = cloudResult.public_id;
-    } catch (err) {
-      console.error('Cloudinary upload failed:', err.message);
-      return res.status(500).json({
+    // 1b. Validate description — now MANDATORY, min 20 chars (Change 2)
+    const userDescription = (req.body.description || '').trim().slice(0, MAX_DESC);
+    if (userDescription.length < MIN_DESC) {
+      return res.status(400).json({
         success: false,
-        message: 'Image upload failed. Please verify your Cloudinary credentials and try again.'
+        message: `A description of at least ${MIN_DESC} characters is required.`,
+        errors: [{ field: 'description', message: `Please describe the issue in at least ${MIN_DESC} characters.` }]
       });
     }
 
-    const imageUrl = cloudResult.secure_url;
+    // 2. Upload to Cloudinary — only if a photo was provided (Change 2)
+    let imageUrl;
+    if (req.file) {
+      try {
+        const cloudResult = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+        cloudinaryPublicId = cloudResult.public_id;
+        imageUrl = cloudResult.secure_url;
+      } catch (err) {
+        console.error('Cloudinary upload failed:', err.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Image upload failed. Please verify your Cloudinary credentials and try again.'
+        });
+      }
+    }
 
-    // 3 & 4. Gemini Vision (with built-in fallback)
-    const aiResult = await analyseImage(imageUrl, userDescription);
+    // 3 & 4. Analyse — image+description if a photo exists, else description only (Change 2)
+    const aiResult = imageUrl
+      ? await analyseImage(imageUrl, userDescription)
+      : await analyseText(userDescription);
 
     // 5. Reverse geocode (with built-in fallback)
     const address = await reverseGeocode(lat, lng);
@@ -74,16 +80,17 @@ async function submitComplaint(req, res, next) {
     }
     const nearbyCount = nearby.length + 1;
 
-    // 7. Match portal
-    const portal = findPortal(address.state, address.district, address.city, aiResult.type);
+    // 7. Match portals — ranked list (Change 4); top one kept for backward compat
+    const portals = findPortals(address.state, address.district, address.city, aiResult.type, address);
+    const portal = portals[0];
 
-    // 8. Generate petition (with built-in fallback)
+    // 8. Generate petition — specific, single-citizen, NO counts (Change 5)
     const petitionText = await generatePetition({
       type: aiResult.type,
       severity: aiResult.severity,
+      userDescription,
       aiDescription: aiResult.aiDescription,
       address,
-      nearbyCount,
       portal
     });
 
@@ -93,12 +100,12 @@ async function submitComplaint(req, res, next) {
     const complaint = await Complaint.create({
       type: aiResult.type,
       severity: aiResult.severity,
-      description: userDescription || undefined,
+      description: userDescription,
       aiDescription: aiResult.aiDescription,
       landmark: aiResult.landmark || undefined,
       aiConfidence: aiResult.confidence,
-      imageUrl,
-      imagePublicId: cloudinaryPublicId,
+      imageUrl: imageUrl || undefined,
+      imagePublicId: cloudinaryPublicId || undefined,
       location: { type: 'Point', coordinates: [lng, lat] },
       address,
       matchedPortal: {
@@ -107,20 +114,25 @@ async function submitComplaint(req, res, next) {
         officer: portal.officer,
         email: portal.email,
         phone: portal.phone,
+        description: portal.description,
         steps: portal.steps,
         isMunicipal: !!portal.isMunicipal,
         isNational: !!portal.isNational
       },
+      portalSuggestions: portals,
       clusterId,
       nearbyCount,
-      petitionText,
-      reporterSession
+      petitionText
     });
 
     // Sync the cluster count across older complaints (fire and forget)
     updateClusterCount({
       lat, lng, type: aiResult.type, clusterId, count: nearbyCount
     }).catch((err) => console.error('Cluster count update failed:', err.message));
+
+    // Representatives + organisations for the result page (Changes 6 & 7)
+    const representatives = getRepresentatives(address);
+    const organisations = getOrganisationsFor(aiResult.type, address.state);
 
     // 10. Respond
     return res.status(201).json({
@@ -129,7 +141,10 @@ async function submitComplaint(req, res, next) {
       complaint,
       nearbyCount,
       portal,
-      petitionText
+      portals,
+      petitionText,
+      representatives,
+      organisations
     });
   } catch (error) {
     if (cloudinaryPublicId) {
@@ -150,9 +165,9 @@ async function getComplaints(req, res, next) {
 
     const filter = {};
     if (req.query.type) filter.type = req.query.type;
-    if (req.query.status) filter.status = req.query.status;
     if (req.query.severity) filter.severity = req.query.severity;
     if (req.query.state) filter['address.state'] = req.query.state;
+    // status filter removed in Change 1
 
     const [complaints, total] = await Promise.all([
       Complaint.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
@@ -256,7 +271,12 @@ async function getComplaintById(req, res, next) {
     if (!complaint) {
       return res.status(404).json({ success: false, message: 'Complaint not found' });
     }
-    return res.json({ success: true, complaint });
+
+    // Enrich detail view with representatives + organisations (Changes 6 & 7)
+    const representatives = getRepresentatives(complaint.address || {});
+    const organisations = getOrganisationsFor(complaint.type, complaint.address?.state);
+
+    return res.json({ success: true, complaint, representatives, organisations });
   } catch (error) {
     return next(error);
   }

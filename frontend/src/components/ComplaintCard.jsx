@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { MapPin, Calendar, Users } from 'lucide-react';
 import {
   TYPE_LABELS,
-  formatRelative,
+  reportedOn,
   shortAddress,
   severityBadgeClass
 } from '../utils/formatters.js';
@@ -63,7 +63,7 @@ export default function ComplaintCard({ complaint }) {
             </span>
             <span className="inline-flex items-center gap-1">
               <Calendar size={12} aria-hidden />
-              {formatRelative(complaint.createdAt)}
+              {reportedOn(complaint.createdAt)}
             </span>
           </div>
         </div>

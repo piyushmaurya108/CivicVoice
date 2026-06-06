@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "lastUpdated": "2025-06",
+    "warning": "Representative details change after elections. Verify the name and especially the social-media handles on the official Lok Sabha / State Vidhan Sabha / Municipal Corporation websites before tagging or contacting.",
+    "sources": {
+      "mp": "https://sansad.in/ls/members",
+      "mla": "State Vidhan Sabha / Legislative Assembly website",
+      "mayor": "State Local Government / Municipal Corporation website"
+    }
+  },
+  "_directories": {
+    "mp": { "name": "Lok Sabha Members Directory", "url": "https://sansad.in/ls/members" },
+    "rajyasabha": { "name": "Rajya Sabha Members Directory", "url": "https://sansad.in/rs/members" },
+    "states": {
+      "Punjab": {
+        "mla": { "name": "Punjab Vidhan Sabha — Members", "url": "https://punjabassembly.nic.in" },
+        "mayor": { "name": "Punjab Local Government Department", "url": "https://lgpunjab.gov.in" }
+      },
+      "Delhi": {
+        "mla": { "name": "Delhi Vidhan Sabha — Members", "url": "http://delhiassembly.nic.in" },
+        "mayor": { "name": "Municipal Corporation of Delhi", "url": "https://mcdonline.nic.in" }
+      },
+      "Uttar Pradesh": {
+        "mla": { "name": "UP Vidhan Sabha — Members", "url": "https://uplegisassembly.gov.in" },
+        "mayor": { "name": "UP Urban Local Bodies / Nagar Nigam", "url": "https://www.upurbandevelopment.com" }
+      },
+      "Maharashtra": {
+        "mla": { "name": "Maharashtra Vidhan Sabha — Members", "url": "https://mahapolitical.maharashtra.gov.in" },
+        "mayor": { "name": "Maharashtra Urban Local Bodies", "url": "https://mahaulb.in" }
+      },
+      "Karnataka": {
+        "mla": { "name": "Karnataka Vidhana Sabha — Members", "url": "https://kla.kar.nic.in" },
+        "mayor": { "name": "Karnataka Directorate of Municipal Administration", "url": "https://municipaladmn.karnataka.gov.in" }
+      }
+    }
+  },
+  "constituencies": {
+    "Punjab|Ludhiana": {
+      "mp": {
+        "name": "Amarinder Singh Raja Warring",
+        "party": "Indian National Congress (INC)",
+        "constituency": "Ludhiana (Lok Sabha)",
+        "email": null,
+        "phone": null,
+        "twitter": "https://x.com/RajaBrar_INC",
+        "facebook": null,
+        "instagram": null,
+        "verified": true,
+        "note": "Elected 2024 (18th Lok Sabha). Office contact via the Lok Sabha members directory."
+      },
+      "mla": {
+        "name": "See your assembly segment (e.g. Ludhiana Central: Ashok Prashar 'Pappi', AAP)",
+        "party": "Varies by assembly segment",
+        "constituency": "Ludhiana district has 9 assembly segments — confirm yours",
+        "email": null,
+        "phone": null,
+        "twitter": null,
+        "facebook": null,
+        "instagram": null,
+        "verified": false,
+        "note": "Ludhiana has multiple MLAs (Ludhiana East/South/Central/West/North, Atam Nagar, Gill, Dakha, Jagraon). Look up the MLA for your exact assembly segment on the Punjab Vidhan Sabha website."
+      },
+      "mayor": {
+        "name": "Office of the Mayor / Commissioner, Municipal Corporation Ludhiana",
+        "party": "Local body",
+        "constituency": "Municipal Corporation Ludhiana",
+        "email": null,
+        "phone": "0161-2749121",
+        "twitter": null,
+        "facebook": null,
+        "instagram": null,
+        "verified": false,
+        "note": "Mayoral office-bearers change with civic-body terms. Contact the Municipal Corporation Ludhiana directly for the current Mayor."
+      }
+    }
+  }
+}

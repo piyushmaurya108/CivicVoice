@@ -6,8 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner.jsx';
 import useComplaints from '../hooks/useComplaints.js';
 import {
   TYPE_OPTIONS,
-  SEVERITY_OPTIONS,
-  STATUS_OPTIONS
+  SEVERITY_OPTIONS
 } from '../utils/formatters.js';
 
 const PAGE_SIZE = 12;
@@ -15,8 +14,7 @@ const PAGE_SIZE = 12;
 export default function ComplaintFeed() {
   const [filters, setFilters] = useState({
     type: '',
-    severity: '',
-    status: ''
+    severity: ''
   });
   const [page, setPage] = useState(1);
   const [mobileView, setMobileView] = useState('list'); // 'list' | 'map'
@@ -25,7 +23,6 @@ export default function ComplaintFeed() {
     const p = { page, limit: PAGE_SIZE };
     if (filters.type) p.type = filters.type;
     if (filters.severity) p.severity = filters.severity;
-    if (filters.status) p.status = filters.status;
     return p;
   }, [filters, page]);
 
@@ -37,12 +34,11 @@ export default function ComplaintFeed() {
   };
 
   const clearFilters = () => {
-    setFilters({ type: '', severity: '', status: '' });
+    setFilters({ type: '', severity: '' });
     setPage(1);
   };
 
-  const hasFilters =
-    filters.type || filters.severity || filters.status;
+  const hasFilters = filters.type || filters.severity;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
@@ -102,12 +98,6 @@ export default function ComplaintFeed() {
             value={filters.severity}
             onChange={(v) => updateFilter('severity', v)}
             options={SEVERITY_OPTIONS}
-          />
-          <FilterSelect
-            label="Status"
-            value={filters.status}
-            onChange={(v) => updateFilter('status', v)}
-            options={STATUS_OPTIONS}
           />
 
           {hasFilters && (

@@ -7,6 +7,7 @@ require('dotenv').config();
 const connectDB = require('./config/db');
 const complaintRoutes = require('./routes/complaintRoutes');
 const portalRoutes = require('./routes/portalRoutes');
+const civicRoutes = require('./routes/civicRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -33,6 +34,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/portals', portalRoutes);
+app.use('/api', civicRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -52,7 +54,9 @@ app.get('/', (req, res) => {
       'GET    /api/complaints/stats',
       'GET    /api/complaints/nearby',
       'GET    /api/complaints/:id',
-      'GET    /api/portals'
+      'GET    /api/portals',
+      'GET    /api/representatives',
+      'GET    /api/organisations'
     ]
   });
 });
