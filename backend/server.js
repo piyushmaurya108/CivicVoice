@@ -12,6 +12,26 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
+function normalizeOrigin(origin) {
+  if (!origin || typeof origin !== 'string') return null;
+  const trimmed = origin.trim().replace(/\/+$/, '');
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
+function getAllowedOrigins() {
+  const configured = [
+    process.env.FRONTEND_URL,
+    process.env.FRONTEND_URL_PRODUCTION,
+    'http://localhost:5173'
+  ]
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
+  return [...new Set(configured)];
+}
+
 // Connect to MongoDB
 connectDB();
 
@@ -23,7 +43,15 @@ app.use(
 );
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin(origin, callback) {
+      const allowedOrigins = getAllowedOrigins();
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true
   })
 );
