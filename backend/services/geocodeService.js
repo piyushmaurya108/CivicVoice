@@ -1,5 +1,24 @@
 const axios = require('axios');
 
+function firstNonEmpty(address, keys) {
+  for (const key of keys) {
+    const value = address?.[key];
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  return null;
+}
+
+function dedupeAgainst(value, ...others) {
+  if (!value) return null;
+  const normalized = value.trim().toLowerCase();
+  const duplicate = others.some(
+    (other) => typeof other === 'string' && other.trim().toLowerCase() === normalized
+  );
+  return duplicate ? null : value;
+}
+
 /**
  * Reverse geocode (lat, lng) using Nominatim (OpenStreetMap).
  * Free, no API key needed. Always returns — never throws.
@@ -15,16 +34,50 @@ async function reverseGeocode(lat, lng) {
 
     const addr = response.data.address || {};
 
+    const ward = firstNonEmpty(addr, [
+      'suburb',
+      'neighbourhood',
+      'quarter',
+      'borough',
+      'city_district'
+    ]);
+    const city = firstNonEmpty(addr, [
+      'city',
+      'town',
+      'municipality',
+      'city_district',
+      'village'
+    ]);
+    const district = dedupeAgainst(
+      firstNonEmpty(addr, ['county', 'state_district', 'district']),
+      city
+    );
+    const locality = dedupeAgainst(
+      firstNonEmpty(addr, [
+        'neighbourhood',
+        'suburb',
+        'quarter',
+        'hamlet',
+        'village',
+        'city_district',
+        'municipality',
+        'town'
+      ]),
+      ward,
+      city,
+      district
+    );
+
     let areaType = null;
-    if (addr.city) areaType = 'city';
+    if (addr.city || addr.municipality) areaType = 'city';
     else if (addr.town) areaType = 'town';
     else if (addr.village || addr.hamlet) areaType = 'village';
 
     return {
-      ward: addr.suburb || addr.neighbourhood || addr.quarter || null,
-      locality: addr.suburb || addr.village || addr.town || addr.neighbourhood || null,
-      city: addr.city || addr.town || addr.village || addr.county || null,
-      district: addr.county || addr.state_district || null,
+      ward,
+      locality,
+      city,
+      district,
       state: addr.state || null,
       pincode: addr.postcode || null,
       areaType,
