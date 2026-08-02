@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  ArrowLeft,
-  Calendar,
-  Copy,
-  MapPin,
-  Users,
-  AlertTriangle
-} from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Calendar, Copy, MapPin, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ComplaintMap from '../components/ComplaintMap.jsx';
 import ComplaintCounter from '../components/ComplaintCounter.jsx';
@@ -67,23 +60,22 @@ export default function ComplaintDetail() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-        <LoadingSpinner label="Loading complaint…" />
+      <div className="page-container py-16">
+        <LoadingSpinner label="Loading complaint..." />
       </div>
     );
   }
 
   if (error || !complaint) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" aria-hidden />
-          <span>{error || 'Complaint not found'}</span>
+      <div className="page-container py-16">
+        <div className="premium-card border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+          <div className="flex items-start gap-2">
+            <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
+            <span>{error || 'Complaint not found'}</span>
+          </div>
         </div>
-        <Link
-          to="/complaints"
-          className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:underline"
-        >
+        <Link to="/complaints" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-600">
           <ArrowLeft size={14} /> Back to all complaints
         </Link>
       </div>
@@ -99,154 +91,97 @@ export default function ComplaintDetail() {
       : [];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
-      <Link
-        to="/complaints"
-        className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-brand-700"
-      >
+    <div className="page-container py-10 sm:py-14">
+      <Link to="/complaints" className="inline-flex items-center gap-2 text-sm font-semibold text-soft transition hover:text-brand-600">
         <ArrowLeft size={14} /> All complaints
       </Link>
 
-      <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          {/* Image (optional now) */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
+        <div className="space-y-6">
           {complaint.imageUrl && (
-            <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-              <img
-                src={complaint.imageUrl}
-                alt={typeLabel}
-                className="max-h-[480px] w-full object-cover"
-              />
+            <div className="premium-card overflow-hidden">
+              <img src={complaint.imageUrl} alt={typeLabel} className="max-h-[520px] w-full object-cover" />
             </div>
           )}
 
-          {/* Header */}
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">{typeLabel}</h1>
-            <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${severityBadgeClass(
-                complaint.severity
-              )}`}
-            >
-              {complaint.severity}
-            </span>
-          </div>
-
-          {complaint.aiDescription && (
-            <p className="mt-3 text-sm text-gray-700">{complaint.aiDescription}</p>
-          )}
-          {complaint.description && (
-            <div className="mt-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
-              <strong className="text-gray-900">Reporter's note:</strong>{' '}
-              {complaint.description}
-            </div>
-          )}
-
-          {/* Meta */}
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-600">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin size={14} aria-hidden />
-              {fullAddress(complaint.address) || 'Location coordinates only'}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Calendar size={14} aria-hidden />
-              {reportedOn(complaint.createdAt) || formatDateTime(complaint.createdAt)}
-            </span>
-            {complaint.landmark && (
-              <span className="inline-flex items-center gap-1.5">
-                <strong className="text-gray-900">Landmark:</strong>
-                {complaint.landmark}
+          <div className="premium-card px-6 py-6 sm:px-8 sm:py-8">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-4xl font-bold tracking-[-0.05em] text-ink">{typeLabel}</h1>
+              <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold capitalize ${severityBadgeClass(complaint.severity)}`}>
+                {complaint.severity}
               </span>
+            </div>
+
+            {complaint.aiDescription && <p className="mt-4 text-base leading-8 text-soft">{complaint.aiDescription}</p>}
+            {complaint.description && (
+              <div className="mt-5 rounded-[24px] border border-line bg-surfaceAlt p-4 text-sm leading-7 text-soft">
+                <strong className="text-ink">Reporter&apos;s note:</strong> {complaint.description}
+              </div>
             )}
+
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-soft">
+              <span className="inline-flex items-center gap-2">
+                <MapPin size={14} className="text-brand-500" />
+                {fullAddress(complaint.address) || 'Location coordinates only'}
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Calendar size={14} className="text-brand-500" />
+                {reportedOn(complaint.createdAt) || formatDateTime(complaint.createdAt)}
+              </span>
+              {complaint.landmark && <span><strong className="text-ink">Landmark:</strong> {complaint.landmark}</span>}
+            </div>
+
+            <div className="mt-6">
+              <ComplaintCounter count={complaint.nearbyCount} />
+            </div>
           </div>
 
-          <div className="mt-4">
-            <ComplaintCounter count={complaint.nearbyCount} />
-          </div>
-
-          {/* Petition */}
           {complaint.petitionText && (
-            <section className="mt-6 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-                  Petition letter
-                </h2>
-                <button
-                  type="button"
-                  onClick={copyPetition}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800"
-                >
-                  <Copy size={12} />
+            <section className="premium-card px-6 py-6">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-mist">Petition letter</h2>
+                <button type="button" onClick={copyPetition} className="secondary-button">
+                  <Copy size={14} />
                   Copy
                 </button>
               </div>
-              <pre className="max-h-96 overflow-y-auto whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50 p-4 font-sans text-sm text-gray-800">
+              <pre className="max-h-96 overflow-y-auto whitespace-pre-wrap rounded-[24px] border border-line bg-surfaceAlt p-5 font-sans text-sm leading-7 text-ink">
                 {complaint.petitionText}
               </pre>
             </section>
           )}
 
-          {/* Ranked portals (Change 4) */}
-          {portalList.length > 0 && (
-            <div className="mt-6">
-              <PortalSuggestions portals={portalList} />
-            </div>
-          )}
-
-          {/* Representatives (Change 6) */}
-          {representatives && (
-            <div className="mt-6">
-              <RepresentativesSection
-                data={representatives}
-                type={complaint.type}
-                address={complaint.address}
-              />
-            </div>
-          )}
-
-          {/* Organisations (Change 7) */}
-          {organisations && (
-            <div className="mt-6">
-              <OrganisationsSection data={organisations} />
-            </div>
-          )}
+          {portalList.length > 0 && <PortalSuggestions portals={portalList} />}
+          {representatives && <RepresentativesSection data={representatives} type={complaint.type} address={complaint.address} />}
+          {organisations && <OrganisationsSection data={organisations} />}
         </div>
 
-        {/* Sidebar */}
-        <aside className="space-y-5">
-          <section className="rounded-xl border border-gray-100 bg-white p-2 shadow-sm">
+        <aside className="space-y-6">
+          <div className="premium-card p-3">
             <ComplaintMap
               complaints={[complaint]}
-              height="320px"
+              height="360px"
               initialCenter={
                 complaint.location?.coordinates
-                  ? [
-                      complaint.location.coordinates[1],
-                      complaint.location.coordinates[0]
-                    ]
+                  ? [complaint.location.coordinates[1], complaint.location.coordinates[0]]
                   : undefined
               }
               initialZoom={15}
             />
-          </section>
+          </div>
 
-          <section className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-              Cluster
-            </h3>
-            <div className="mt-2 inline-flex items-center gap-2 text-sm text-gray-700">
-              <Users size={14} aria-hidden />
+          <div className="premium-card px-6 py-6">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-mist">Cluster</h3>
+            <div className="mt-4 inline-flex items-center gap-2 text-sm leading-7 text-soft">
+              <Users size={15} className="text-brand-500" />
               <span>
-                <strong>{complaint.nearbyCount}</strong> report
-                {complaint.nearbyCount === 1 ? '' : 's'} of a similar issue within 500 m
+                <strong className="text-ink">{complaint.nearbyCount}</strong> report{complaint.nearbyCount === 1 ? '' : 's'} of a similar issue within 500 m
               </span>
             </div>
             {complaint.clusterId && (
-              <p className="mt-1 break-all text-xs text-gray-400">
-                Cluster ID: {complaint.clusterId}
-              </p>
+              <p className="mt-3 break-all text-xs text-mist">Cluster ID: {complaint.clusterId}</p>
             )}
-          </section>
+          </div>
         </aside>
       </div>
     </div>

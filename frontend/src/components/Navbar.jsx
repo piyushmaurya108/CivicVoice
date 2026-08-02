@@ -1,11 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
-
-const linkBase =
-  'px-3 py-2 rounded-md text-sm font-medium transition-colors';
-const linkInactive = 'text-gray-700 hover:bg-gray-100 hover:text-brand-700';
-const linkActive = 'bg-brand-50 text-brand-700';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Building2, Menu, X } from 'lucide-react';
 
 const navItems = [
   { to: '/', label: 'Home', end: true },
@@ -15,28 +11,50 @@ const navItems = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+    <motion.header
+      className="sticky top-0 z-50 px-3 pt-3 sm:px-5"
+      initial={{ y: -24, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <nav
+        className={`page-container premium-card flex items-center justify-between rounded-[26px] px-4 py-3.5 transition-all sm:px-6 ${
+          scrolled ? 'bg-white/85 backdrop-blur-xl' : 'bg-white/92'
+        }`}
+      >
         <Link
           to="/"
-          className="flex items-center gap-2 text-xl font-bold text-brand-700"
+          className="flex items-center gap-3 text-[1.55rem] font-bold tracking-[-0.04em] text-ink"
           onClick={() => setOpen(false)}
         >
-          <span aria-hidden>🏛️</span>
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
+            <Building2 size={21} strokeWidth={2.1} />
+          </span>
           <span>CivicVoice</span>
         </Link>
 
-        {/* Desktop links */}
-        <div className="hidden items-center gap-1 sm:flex">
+        <div className="hidden flex-1 items-center justify-center gap-2 lg:flex">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `${linkBase} ${isActive ? linkActive : linkInactive}`
+                `rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
+                  isActive
+                    ? 'bg-brand-50 text-brand-600 shadow-[inset_0_0_0_1px_rgba(51,102,255,0.08)]'
+                    : 'text-soft hover:bg-surfaceAlt hover:text-ink'
+                }`
               }
             >
               {item.label}
@@ -44,37 +62,47 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Mobile toggle */}
         <button
           type="button"
-          className="rounded-md p-2 text-gray-600 hover:bg-gray-100 sm:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-line bg-white text-soft lg:hidden"
           aria-label="Toggle menu"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => setOpen((value) => !value)}
         >
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
       </nav>
 
-      {/* Mobile drawer */}
-      {open && (
-        <div className="border-t border-gray-200 bg-white sm:hidden">
-          <div className="space-y-1 px-4 py-3">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  `block ${linkBase} ${isActive ? linkActive : linkInactive}`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
-        </div>
-      )}
-    </header>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="page-container mt-3 lg:hidden"
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.22 }}
+          >
+            <div className="premium-card flex flex-col gap-2 rounded-[28px] px-3 py-3">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  onClick={() => setOpen(false)}
+                  className={({ isActive }) =>
+                    `rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                      isActive
+                        ? 'bg-brand-50 text-brand-600'
+                        : 'text-soft hover:bg-surfaceAlt hover:text-ink'
+                    }`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }

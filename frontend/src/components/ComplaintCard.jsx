@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Calendar, Users } from 'lucide-react';
+import { Calendar, MapPin, MoveRight, Users } from 'lucide-react';
 import {
   TYPE_LABELS,
   reportedOn,
@@ -14,10 +14,10 @@ export default function ComplaintCard({ complaint }) {
   return (
     <Link
       to={`/complaints/${complaint._id}`}
-      className="block overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="premium-card premium-card-hover block overflow-hidden"
     >
-      <div className="flex">
-        <div className="h-32 w-32 flex-shrink-0 bg-gray-100 sm:h-40 sm:w-40">
+      <div className="flex h-full flex-col">
+        <div className="h-56 bg-surfaceAlt">
           {complaint.imageUrl ? (
             <img
               src={complaint.imageUrl}
@@ -26,45 +26,49 @@ export default function ComplaintCard({ complaint }) {
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
-              No image
+            <div className="flex h-full items-center justify-center text-sm text-mist">
+              No image provided
             </div>
           )}
         </div>
 
-        <div className="flex flex-1 flex-col gap-2 p-4">
+        <div className="flex flex-1 flex-col p-6">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold text-gray-900">{typeLabel}</h3>
+            <h3 className="text-xl font-semibold tracking-[-0.03em] text-ink">
+              {typeLabel}
+            </h3>
             <span
-              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${severityBadgeClass(
+              className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold capitalize ${severityBadgeClass(
                 complaint.severity
               )}`}
             >
               {complaint.severity}
             </span>
             {complaint.nearbyCount > 1 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
-                <Users size={12} aria-hidden />
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-600">
+                <Users size={12} />
                 {complaint.nearbyCount} nearby
               </span>
             )}
           </div>
 
-          {complaint.aiDescription && (
-            <p className="line-clamp-2 text-sm text-gray-600">
-              {complaint.aiDescription}
-            </p>
-          )}
+          <p className="mt-4 line-clamp-3 text-sm leading-7 text-soft">
+            {complaint.aiDescription || complaint.description || 'No description available.'}
+          </p>
 
-          <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
-            <span className="inline-flex items-center gap-1">
-              <MapPin size={12} aria-hidden />
+          <div className="mt-6 space-y-2 text-sm text-soft">
+            <div className="flex items-center gap-2">
+              <MapPin size={15} className="text-brand-500" />
               {shortAddress(complaint.address) || 'Location pending'}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Calendar size={12} aria-hidden />
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar size={15} className="text-brand-500" />
               {reportedOn(complaint.createdAt)}
-            </span>
+            </div>
+          </div>
+
+          <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-600">
+            View details <MoveRight size={15} />
           </div>
         </div>
       </div>

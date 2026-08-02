@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   MapContainer,
   TileLayer,
@@ -11,8 +11,14 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { MapPin, LocateFixed, Loader2, MousePointerClick, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+  LocateFixed,
+  Loader2,
+  MapPin,
+  MousePointerClick,
+  Search
+} from 'lucide-react';
 import {
   TYPE_LABELS,
   SEVERITY_MARKER_HEX,
@@ -22,7 +28,6 @@ import {
 import useGeolocation from '../hooks/useGeolocation.js';
 import AddressSearch from './AddressSearch.jsx';
 
-// Fix Leaflet's default marker icon paths (broken by Vite's bundler)
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -33,14 +38,12 @@ L.Icon.Default.mergeOptions({
 const INDIA_CENTER = [20.5937, 78.9629];
 const INDIA_ZOOM = 5;
 
-// Colour-coded SVG marker for the feed view
 function severityIcon(severity) {
   const colour = SEVERITY_MARKER_HEX[severity] || '#2563eb';
   const html = `
     <div style="position:relative;width:28px;height:38px;">
       <svg viewBox="0 0 28 38" width="28" height="38" xmlns="http://www.w3.org/2000/svg">
-        <path d="M14 0C6.27 0 0 6.27 0 14c0 9.5 14 24 14 24s14-14.5 14-24C28 6.27 21.73 0 14 0z"
-          fill="${colour}" stroke="#fff" stroke-width="2"/>
+        <path d="M14 0C6.27 0 0 6.27 0 14c0 9.5 14 24 14 24s14-14.5 14-24C28 6.27 21.73 0 14 0z" fill="${colour}" stroke="#fff" stroke-width="2"/>
         <circle cx="14" cy="14" r="5" fill="#fff"/>
       </svg>
     </div>`;
@@ -53,7 +56,6 @@ function severityIcon(severity) {
   });
 }
 
-// Inner component: handles map clicks for picker mode
 function PickerHandler({ onPick }) {
   useMapEvents({
     click(e) {
@@ -63,7 +65,6 @@ function PickerHandler({ onPick }) {
   return null;
 }
 
-// Inner component: imperatively flies the map to a target lat/lng
 function FlyTo({ target, zoom = 15 }) {
   const map = useMap();
   useEffect(() => {
@@ -74,33 +75,24 @@ function FlyTo({ target, zoom = 15 }) {
   return null;
 }
 
-// Picker-method toggle button
 function MethodButton({ active, onClick, icon: Icon, label }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+      className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
         active
-          ? 'bg-brand-600 text-white shadow-sm'
-          : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+          ? 'bg-brand-500 text-white shadow-glow'
+          : 'border border-line bg-white text-soft hover:bg-surfaceAlt'
       }`}
       aria-pressed={active}
     >
-      <Icon size={15} aria-hidden />
+      <Icon size={15} />
       {label}
     </button>
   );
 }
 
-/**
- * ComplaintMap
- *
- * Picker mode (onLocationPick prop present): three ways to set a location —
- *   Click Map · Use GPS · Search Address (cascading dropdowns).  (Change 3)
- *
- * Feed mode: pass `complaints` to render colour-coded markers.
- */
 export default function ComplaintMap({
   pickedLocation = null,
   onLocationPick,
@@ -111,10 +103,9 @@ export default function ComplaintMap({
 }) {
   const isPicker = typeof onLocationPick === 'function';
   const { getLocation, loading: gpsLoading } = useGeolocation();
-  const mapRef = useRef(null);
 
-  const [method, setMethod] = useState('click'); // 'click' | 'gps' | 'address'
-  const [flyTarget, setFlyTarget] = useState(null); // address-search parallel zoom
+  const [method, setMethod] = useState('click');
+  const [flyTarget, setFlyTarget] = useState(null);
   const [flyZoom, setFlyZoom] = useState(7);
 
   const handleGPS = async () => {
@@ -122,89 +113,50 @@ export default function ComplaintMap({
       const coords = await getLocation();
       if (onLocationPick) onLocationPick({ lat: coords.lat, lng: coords.lng });
     } catch {
-      /* error already surfaced via the hook */
+      // handled in hook
     }
   };
 
   const handleAddressZoom = (target, zoom) => {
-    setFlyTarget({ ...target, _t: Date.now() }); // _t forces re-fly even for same coords
+    setFlyTarget({ ...target, _t: Date.now() });
     setFlyZoom(zoom);
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       {isPicker && (
-        <div className="space-y-2">
-          {/* Method toggle (Change 3) */}
+        <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <MethodButton
-              active={method === 'click'}
-              onClick={() => setMethod('click')}
-              icon={MousePointerClick}
-              label="Click Map"
-            />
-            <MethodButton
-              active={method === 'gps'}
-              onClick={() => setMethod('gps')}
-              icon={LocateFixed}
-              label="Use GPS"
-            />
-            <MethodButton
-              active={method === 'address'}
-              onClick={() => setMethod('address')}
-              icon={Search}
-              label="Search Address"
-            />
+            <MethodButton active={method === 'click'} onClick={() => setMethod('click')} icon={MousePointerClick} label="Click Map" />
+            <MethodButton active={method === 'gps'} onClick={() => setMethod('gps')} icon={LocateFixed} label="Use GPS" />
+            <MethodButton active={method === 'address'} onClick={() => setMethod('address')} icon={Search} label="Search Address" />
           </div>
 
           {method === 'click' && (
-            <div className="inline-flex items-center gap-2 rounded-md border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700">
-              <MapPin size={16} aria-hidden />
-              <span>Click anywhere on the map to drop a pin</span>
+            <div className="rounded-2xl border border-brand-100 bg-brand-50 px-4 py-3 text-sm font-medium text-brand-600">
+              Click anywhere on the map to drop a pin.
             </div>
           )}
 
           {method === 'gps' && (
-            <button
-              type="button"
-              onClick={handleGPS}
-              disabled={gpsLoading}
-              className="inline-flex items-center gap-2 rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {gpsLoading ? (
-                <Loader2 size={16} className="animate-spin" aria-hidden />
-              ) : (
-                <LocateFixed size={16} aria-hidden />
-              )}
-              {gpsLoading ? 'Locating…' : 'Use my GPS location'}
+            <button type="button" onClick={handleGPS} disabled={gpsLoading} className="primary-button">
+              {gpsLoading ? <Loader2 size={16} className="animate-spin" /> : <LocateFixed size={16} />}
+              {gpsLoading ? 'Locating...' : 'Use my GPS location'}
             </button>
           )}
 
-          {method === 'address' && (
-            <AddressSearch onZoom={handleAddressZoom} onPick={onLocationPick} />
-          )}
+          {method === 'address' && <AddressSearch onZoom={handleAddressZoom} onPick={onLocationPick} />}
         </div>
       )}
 
-      <div
-        className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
-        style={{ height }}
-      >
-        <MapContainer
-          center={initialCenter}
-          zoom={initialZoom}
-          style={{ height: '100%', width: '100%' }}
-          ref={mapRef}
-          scrollWheelZoom
-        >
+      <div className="overflow-hidden rounded-[28px] border border-line bg-white shadow-soft" style={{ height }}>
+        <MapContainer center={initialCenter} zoom={initialZoom} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {/* PICKER MODE */}
           {isPicker && <PickerHandler onPick={onLocationPick} />}
-          {/* Address-search parallel zoom (no pin) */}
           {isPicker && flyTarget && <FlyTo target={flyTarget} zoom={flyZoom} />}
           {isPicker && pickedLocation && (
             <>
@@ -213,14 +165,12 @@ export default function ComplaintMap({
                 <Popup>
                   <strong>Selected location</strong>
                   <br />
-                  Lat {pickedLocation.lat.toFixed(5)}, Lng{' '}
-                  {pickedLocation.lng.toFixed(5)}
+                  Lat {pickedLocation.lat.toFixed(5)}, Lng {pickedLocation.lng.toFixed(5)}
                 </Popup>
               </Marker>
             </>
           )}
 
-          {/* FEED MODE */}
           {!isPicker &&
             Array.isArray(complaints) &&
             complaints.map((c) => {
@@ -228,27 +178,16 @@ export default function ComplaintMap({
               if (!Array.isArray(coords) || coords.length !== 2) return null;
               const [lng, lat] = coords;
               return (
-                <Marker
-                  key={c._id}
-                  position={[lat, lng]}
-                  icon={severityIcon(c.severity)}
-                >
+                <Marker key={c._id} position={[lat, lng]} icon={severityIcon(c.severity)}>
                   <Popup>
                     <div className="space-y-1 text-xs">
-                      <div className="font-semibold text-sm">
-                        {TYPE_LABELS[c.type] || c.type}{' '}
-                        <span className="font-normal text-gray-500 capitalize">
-                          · {c.severity}
-                        </span>
+                      <div className="text-sm font-semibold">
+                        {TYPE_LABELS[c.type] || c.type}
+                        <span className="font-normal text-gray-500 capitalize"> · {c.severity}</span>
                       </div>
-                      <div className="text-gray-600">
-                        {shortAddress(c.address) || 'Location pending'}
-                      </div>
+                      <div className="text-gray-600">{shortAddress(c.address) || 'Location pending'}</div>
                       <div className="text-gray-500">{formatRelative(c.createdAt)}</div>
-                      <Link
-                        to={`/complaints/${c._id}`}
-                        className="mt-1 inline-block font-medium text-brand-600 hover:underline"
-                      >
+                      <Link to={`/complaints/${c._id}`} className="mt-1 inline-block font-medium text-brand-600 hover:underline">
                         View details →
                       </Link>
                     </div>
@@ -260,11 +199,10 @@ export default function ComplaintMap({
       </div>
 
       {isPicker && pickedLocation && (
-        <p className="text-sm text-gray-700">
-          📍 Lat:{' '}
-          <strong className="text-gray-900">{pickedLocation.lat.toFixed(5)}</strong>
-          , Lng:{' '}
-          <strong className="text-gray-900">{pickedLocation.lng.toFixed(5)}</strong>
+        <p className="flex items-center gap-2 text-sm text-soft">
+          <MapPin size={15} className="text-brand-500" />
+          Lat <strong className="text-ink">{pickedLocation.lat.toFixed(5)}</strong>, Lng{' '}
+          <strong className="text-ink">{pickedLocation.lng.toFixed(5)}</strong>
         </p>
       )}
     </div>
